@@ -8,8 +8,8 @@ set -e
 
 # 1. Install system dependencies
 echo "Step 1: Installing system dependencies..."
-sudo apt-get update
-sudo apt-get install -y python3 python3-venv python3-pip git
+# sudo apt-get update
+# sudo apt-get install -y python3 python3-venv python3-pip git
 
 
 # 2 Install USB Gadget Module (if on Raspberry Pi)

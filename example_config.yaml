@@ -1,0 +1,27 @@
+# Example YAML config for Zero-HID_MQTT 
+
+# Logging level: DEBUG, INFO, WARNING, ERROR
+log_level: INFO
+
+# MQTT broker connection details
+mqtt_broker: xxx.xxx.xxx.xxx  # IP or hostname of your MQTT broker
+mqtt_port: 1883          # Default MQTT port
+mqtt_username: mqtt_username      # MQTT username
+mqtt_password: mqtt_password  # MQTT password
+
+device_name: HID_XYZ  # Unique name for this device
+
+
+# List of controls to expose via MQTT/Home Assistant
+controls:
+  # Shortcut 1
+  - name: Keyboard Shortcut 1  # Unique key for this control (used in MQTT payloads)
+    key: key_shortcut1 # Friendly name for Home Assistant
+    entity_type: button # button, switch, select, number
+    HID_type: keyboard  # keyboard, mouse
+    HID_action: # value to send when activated (WIN + L in this case)
+      - MOD_LEFT_GUI
+      - KeyCodes.KEY_L  
+    entity_category: control   # Optional: config, diagnostic, or omit for none
+  
+ 

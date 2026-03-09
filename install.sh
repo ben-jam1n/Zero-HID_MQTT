@@ -14,26 +14,26 @@ sudo apt-get install -y python3 python3-venv python3-pip git
 
 # 2 Install USB Gadget Module (if on Raspberry Pi)
 echo "Step 2: Installing zero-hid USB Gadget module..."
-zero-hid_DIR="/opt/Zero-HID"
+Zero_HID_DIR="/opt/Zero-HID"
 zero-hid_GITHUB_URL="https://github.com/thewh1teagle/zero-hid"
 
 # 2.1 Create install directory
 echo "Creating zero-hid installation directory..."
-sudo mkdir -p "$zero-hid_DIR"
-sudo chown $USER:$USER "$zero-hid_DIR"
+sudo mkdir -p "$Zero_HID_DIR"
+sudo chown $USER:$USER "$Zero_HID_DIR"
 
 # 2.2. Clone repository
 echo "Cloning repository..."
-if [ -d "$zero-hid_DIR/.git" ]; then
+if [ -d "$Zero_HID_DIR/.git" ]; then
     echo "Repository already exists, pulling latest changes..."
-    cd "$zero-hid_DIR" && git pull
+    cd "$Zero_HID_DIR" && git pull
 else
-    git clone "$zero-hid_GITHUB_URL" "$zero-hid_DIR"
+    git clone "$zero-hid_GITHUB_URL" "$Zero_HID_DIR"
 fi
 
 # 2.3 Install zero-hid usb_gadget module
 echo "Installing zero-hid USB Gadget module..."
-cd $zero-hid_DIR && cd ./usb_gadget
+cd $Zero_HID_DIR && cd ./usb_gadget
 sudo ./installer
 
 echo "zero-hid USB Gadget module installation complete!"

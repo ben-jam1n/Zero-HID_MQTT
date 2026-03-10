@@ -23,5 +23,13 @@ controls:
       - MOD_LEFT_GUI
       - KeyCodes.KEY_L  
     entity_category: control   # Optional: config, diagnostic, or omit for none
+
+
+  # Service Restart button (diagnostic)
+  - name: Restart Service
+    key: restart_service
+    entity_type: button
+    entity_category: diagnostic  # Only shows in developer/diagnostic view
+    is_restart_button: true  # Flag to trigger service restart instead of keyboard commands
   
  

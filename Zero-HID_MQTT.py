@@ -15,7 +15,7 @@ import paho.mqtt.client as mqtt
 # import subprocess
 # import time
 # import threading
-# import functools
+import functools
 import socket
 from zero_hid import Mouse, Keyboard, KeyCodes
 
@@ -211,7 +211,16 @@ def main():
             #         return
             if control:
                 HID_type = control.get("HID_type")
-                if control["entity_type"] == "button" and HID_type == "keyboard":
+                if control.get("is_restart_button", False):
+                    # Handle service restart button
+                    logger.info("Restart button pressed from Home Assistant")
+                    if restart_service():
+                        publish_state(client, f"{TOPIC_PREFIX}/{command}_state", "success")
+                        logger.info("Service restart will occur in a moment (connection may drop)")
+                    else:
+                        publish_state(client, f"{TOPIC_PREFIX}/{command}_state", "error")
+                        logger.error("Failed to initiate service restart")
+                elif control["entity_type"] == "button" and HID_type == "keyboard":
                     HID_action = control.get("HID_action", [])
 
                     def resolve_keycode(name: str):
@@ -261,6 +270,31 @@ def main():
 
     client.connect(MQTT_BROKER, MQTT_PORT, 60)
     client.loop_forever()
+
+    # ---  ---
+    def handle_errors(func):
+        """Decorator to handle errors in DDC commands."""
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except Exception as e:
+                logger.error(f"Error in {func.__name__}: {e}")
+                return None
+        return wrapper
+    @handle_errors
+    def restart_service():
+        """Trigger a service restart by exiting the process.
+        
+        When running under systemd with Restart=always, simply exiting
+        will cause systemd to automatically restart the service.
+        """
+        try:
+            logger.info("Exiting process to trigger systemd restart")
+            sys.exit(0)
+        except Exception as e:
+            logger.error(f"Error during restart: {e}")
+            return False
 
 # =========================
 # Script Entrypoint

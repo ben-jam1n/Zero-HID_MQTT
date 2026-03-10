@@ -259,32 +259,34 @@ def main():
                 # Handle keyboard button controls
                 elif control["entity_type"] == "button" and HID_type == "keyboard":
                     # Get list of HID actions (keycodes and modifiers) from config
-                    HID_action = control.get("HID_action", [])
+                    mod_keys = control.get("Modifiers", [])
+                    key_codes = control.get("KeyCodes", [])
 
                     # Helper function to resolve string keycode names to KeyCodes objects
                     def resolve_keycode(name: str):
-                        # Strip "KeyCodes." prefix if present in config (e.g., "KeyCodes.KEY_L" -> "KEY_L")
+                        # Strip "KeyCodes." prefix if present in config
                         if name.startswith("KeyCodes."):
-                            name = name[9:]  # Remove "KeyCodes." prefix
+                            name = name[9:]
                         return getattr(KeyCodes, name, None)
 
-                    # Separate modifier keys (MOD_*) from main keys
+                    # Resolve modifier keys and main keys to actual KeyCodes objects
                     modifiers = []
                     main_keys = []
-
-                    # Iterate through all configured keycodes
-                    for item in HID_action:
-                        keycode = resolve_keycode(item)
-                        if keycode is None:
-                            print(f"Unknown keycode: {item}")
-                            continue
-
-                        # Classify as modifier or main key
-                        if item.startswith("MOD_"):
+                    
+                    for mod in mod_keys:
+                        keycode = resolve_keycode(mod)
+                        if keycode is not None:
                             modifiers.append(keycode)
                         else:
+                            logger.warning(f"Unknown modifier keycode: {mod}")
+                    
+                    for key in key_codes:
+                        keycode = resolve_keycode(key)
+                        if keycode is not None:
                             main_keys.append(keycode)
-
+                        else:
+                            logger.warning(f"Unknown key keycode: {key}")
+                            
                     # Execute the keyboard keypress with resolved modifiers and keys
                     logger.debug("Calling zero-HID with modifiers: %s and main keys: %s", modifiers, main_keys)
                     with Keyboard() as k:

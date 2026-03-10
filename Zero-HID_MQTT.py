@@ -113,7 +113,7 @@ def main():
 
     DEVICE_NAME = config["device_name"]
     SANITIZED_DEVICE_NAME = DEVICE_NAME.replace(" ", "_")
-    TOPIC_PREFIX = f"ddc_control/{SANITIZED_DEVICE_NAME}"
+    TOPIC_PREFIX = f"hid_control/{SANITIZED_DEVICE_NAME}"
 
     MQTT_TOPIC_COMMAND = f"{TOPIC_PREFIX}/command"
     MQTT_TOPIC_STATE = f"{TOPIC_PREFIX}/state"
@@ -241,6 +241,7 @@ def main():
                             main_keys.append(keycode)
 
                     # Execute the keypress
+                    logger.error("Calling zero-HID with modifiers: %s and main keys: %s", modifiers, main_keys)
                     with Keyboard() as k:
                         for key in main_keys:
                             k.press(modifiers, key)
@@ -273,7 +274,7 @@ def main():
 
     # ---  ---
     def handle_errors(func):
-        """Decorator to handle errors in DDC commands."""
+        """Decorator to handle errors in HID commands."""
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             try:

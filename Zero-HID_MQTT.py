@@ -125,6 +125,32 @@ def main():
         logger.warning(f"Could not determine local IP address: {e}")
         local_ip = "unknown"
 
+    # ---  ---
+    def handle_errors(func):
+        """Decorator to handle errors in HID commands."""
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except Exception as e:
+                logger.error(f"Error in {func.__name__}: {e}")
+                return None
+        return wrapper
+    
+    @handle_errors
+    def restart_service():
+        """Trigger a service restart by exiting the process.
+        
+        When running under systemd with Restart=always, simply exiting
+        will cause systemd to automatically restart the service.
+        """
+        try:
+            logger.info("Exiting process to trigger systemd restart")
+            sys.exit(0)
+        except Exception as e:
+            logger.error(f"Error during restart: {e}")
+            return False
+        
     # Centralized MQTT state publishing
     def publish_state(client, topic, value, retain=True):
         client.publish(topic, value, retain=retain)
@@ -293,30 +319,7 @@ def main():
     client.connect(MQTT_BROKER, MQTT_PORT, 60)
     client.loop_forever()
 
-    # ---  ---
-    def handle_errors(func):
-        """Decorator to handle errors in HID commands."""
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            try:
-                return func(*args, **kwargs)
-            except Exception as e:
-                logger.error(f"Error in {func.__name__}: {e}")
-                return None
-        return wrapper
-    @handle_errors
-    def restart_service():
-        """Trigger a service restart by exiting the process.
-        
-        When running under systemd with Restart=always, simply exiting
-        will cause systemd to automatically restart the service.
-        """
-        try:
-            logger.info("Exiting process to trigger systemd restart")
-            sys.exit(0)
-        except Exception as e:
-            logger.error(f"Error during restart: {e}")
-            return False
+
 
 # =========================
 # Script Entrypoint

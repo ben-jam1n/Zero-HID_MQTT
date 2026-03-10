@@ -191,12 +191,17 @@ def main():
     def on_message(client, userdata, msg):
         """Handle incoming MQTT messages."""
         try:
+            # Decode the incoming MQTT payload to UTF-8 string
             payload = msg.payload.decode("utf-8")
             logger.debug(f"Received message: {payload} on topic: {msg.topic}")
+            
+            # Parse the payload to extract command and optional value (format: "command:value")
             if ":" in payload:
                 command, value = payload.split(":", 1)
             else:
                 command, value = payload, None
+            
+            # Look up the control configuration matching this command key
             control = next((c for c in config["controls"] if c["key"] == command), None)
             # if control:
             #     HID_type = control.get("HID_type")
@@ -209,8 +214,12 @@ def main():
             #                 k.press([itit_keys])   
             #         publish_state(client, f"{TOPIC_PREFIX}/{command}_state", "off")
             #         return
+            
+            # Process the control if found in config
             if control:
                 HID_type = control.get("HID_type")
+                
+                # Check if this is a special restart button for the service
                 if control.get("is_restart_button", False):
                     # Handle service restart button
                     logger.info("Restart button pressed from Home Assistant")
@@ -220,36 +229,48 @@ def main():
                     else:
                         publish_state(client, f"{TOPIC_PREFIX}/{command}_state", "error")
                         logger.error("Failed to initiate service restart")
+                
+                # Handle keyboard button controls
                 elif control["entity_type"] == "button" and HID_type == "keyboard":
+                    # Get list of HID actions (keycodes and modifiers) from config
                     HID_action = control.get("HID_action", [])
 
+                    # Helper function to resolve string keycode names to KeyCodes objects
                     def resolve_keycode(name: str):
+                        # Strip "KeyCodes." prefix if present in config (e.g., "KeyCodes.KEY_L" -> "KEY_L")
+                        if name.startswith("KeyCodes."):
+                            name = name[9:]  # Remove "KeyCodes." prefix
                         return getattr(KeyCodes, name, None)
 
+                    # Separate modifier keys (MOD_*) from main keys
                     modifiers = []
                     main_keys = []
 
+                    # Iterate through all configured keycodes
                     for item in HID_action:
                         keycode = resolve_keycode(item)
                         if keycode is None:
                             print(f"Unknown keycode: {item}")
                             continue
 
+                        # Classify as modifier or main key
                         if item.startswith("MOD_"):
                             modifiers.append(keycode)
                         else:
                             main_keys.append(keycode)
 
-                    # Execute the keypress
-                    logger.error("Calling zero-HID with modifiers: %s and main keys: %s", modifiers, main_keys)
+                    # Execute the keyboard keypress with resolved modifiers and keys
+                    logger.debug("Calling zero-HID with modifiers: %s and main keys: %s", modifiers, main_keys)
                     with Keyboard() as k:
                         for key in main_keys:
                             k.press(modifiers, key)
 
             else:
+                # Command key not found in config
                 logger.warning(f"Unknown command: {command}")
                 publish_state(client, MQTT_TOPIC_STATE, "unknown")
         except Exception as e:
+            # Catch any errors and publish error state
             logger.error(f"Error processing message: {e}")
             publish_state(client, MQTT_TOPIC_STATE, "error")
 

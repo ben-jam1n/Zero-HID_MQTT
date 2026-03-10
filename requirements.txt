@@ -1,2 +1,3 @@
 zero-hid>=1.0.1
+paho-mqtt>=1.6.0
 pyyaml>=5.4.0

@@ -261,13 +261,18 @@ def main():
                     # Get list of HID actions (keycodes and modifiers) from config
                     mod_keys = control.get("Modifiers", [])
                     key_codes = control.get("KeyCodes", [])
+                    
+                    logger.debug(f"Raw modifiers from config: {mod_keys}")
+                    logger.debug(f"Raw keycodes from config: {key_codes}")
 
                     # Helper function to resolve string keycode names to KeyCodes objects
                     def resolve_keycode(name: str):
                         # Strip "KeyCodes." prefix if present in config
                         if name.startswith("KeyCodes."):
                             name = name[9:]
-                        return getattr(KeyCodes, name, None)
+                        resolved = getattr(KeyCodes, name, None)
+                        logger.debug(f"Resolved '{name}' to {resolved}")
+                        return resolved
 
                     # Resolve modifier keys and main keys to actual KeyCodes objects
                     modifiers = []

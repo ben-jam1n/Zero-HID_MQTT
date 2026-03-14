@@ -1,0 +1,178 @@
+# Example Macros for Zero-HID_MQTT
+# 
+# Macros allow you to create complex sequences of keyboard/mouse actions
+# that can be triggered via a single MQTT button.
+#
+# Action types:
+# - type: Send text/characters
+# - key: Press a single key (can have modifiers)
+# - key_combo: Press multiple keys with modifiers simultaneously
+# - delay: Wait for milliseconds between actions
+#
+# For KeyCode names, see:
+# https://github.com/thewh1teagle/zero-hid/blob/main/zero_hid/hid/keycodes.py
+
+macros:
+  # Example 1: Simple form fill with tabs
+  fill_form_simple:
+    name: "Fill Simple Form"
+    description: "Fill a 3-field form. Type field, TAB, repeat"
+    delay_between_actions: 150  # ms delay between each action
+    actions:
+      - type: "type"
+        text: "John Doe"
+      - type: "key"
+        key: "KEY_TAB"
+      - type: "type"
+        text: "john@example.com"
+      - type: "key"
+        key: "KEY_TAB"
+      - type: "type"
+        text: "1234567890"
+      - type: "key"
+        key: "KEY_RETURN"
+
+  # Example 2: Login with username and password
+  login_credentials:
+    name: "Login Sequence"
+    description: "Enter username, TAB, password, ENTER"
+    delay_between_actions: 100
+    actions:
+      - type: "type"
+        text: "admin"
+      - type: "key"
+        key: "KEY_TAB"
+      - type: "type"
+        text: "SecurePassword123!"
+      - type: "key"
+        key: "KEY_RETURN"
+      - type: "delay"
+        ms: 500  # Wait for login to process
+
+  # Example 3: Screenshot, save, and lock
+  screenshot_workflow:
+    name: "Screenshot & Lock"
+    description: "Screenshot (WIN+SHIFT+S), wait, lock (WIN+L)"
+    delay_between_actions: 100
+    actions:
+      - type: "key_combo"
+        modifiers: ["MOD_LEFT_GUI", "MOD_LEFT_SHIFT"]
+        key: "KEY_S"
+      - type: "delay"
+        ms: 1500  # Wait for screenshot tool to open
+      - type: "key_combo"
+        modifiers: ["MOD_LEFT_GUI"]
+        key: "KEY_L"
+
+  # Example 4: Open Run dialog and launch application
+  launch_notepad:
+    name: "Open Notepad"
+    description: "WIN+R, type 'notepad', ENTER"
+    delay_between_actions: 150
+    actions:
+      - type: "key_combo"
+        modifiers: ["MOD_LEFT_GUI"]
+        key: "KEY_R"
+      - type: "delay"
+        ms: 500  # Wait for Run dialog
+      - type: "type"
+        text: "notepad"
+      - type: "key"
+        key: "KEY_RETURN"
+
+  # Example 5: Copy current line and create new line
+  duplicate_line:
+    name: "Duplicate Line (VS Code style)"
+    description: "CTRL+C, DOWN, HOME, ENTER, UP, CTRL+V"
+    delay_between_actions: 75
+    actions:
+      - type: "key_combo"
+        modifiers: ["MOD_LEFT_CTRL"]
+        key: "KEY_C"
+      - type: "delay"
+        ms: 50
+      - type: "key"
+        key: "KEY_DOWN"
+      - type: "key"
+        key: "KEY_HOME"
+      - type: "key"
+        key: "KEY_RETURN"
+      - type: "key"
+        key: "KEY_UP"
+      - type: "key_combo"
+        modifiers: ["MOD_LEFT_CTRL"]
+        key: "KEY_V"
+
+  # Example 6: Alt+Tab to switch windows
+  switch_window:
+    name: "Switch to Next Window"
+    description: "ALT+TAB"
+    actions:
+      - type: "key_combo"
+        modifiers: ["MOD_LEFT_ALT"]
+        key: "KEY_TAB"
+
+  # Example 7: Ctrl+Alt+Delete (emergency action)
+  security_attention:
+    name: "Security Attention"
+    description: "CTRL+ALT+DEL"
+    actions:
+      - type: "key_combo"
+        modifiers: ["MOD_LEFT_CTRL", "MOD_LEFT_ALT"]
+        key: "KEY_DELETE"
+
+  # Example 8: Complex workflow - Open email, new message, paste template
+  email_new_message:
+    name: "New Email Message"
+    description: "CTRL+N in email app, fill recipient, add template"
+    delay_between_actions: 200
+    actions:
+      - type: "key_combo"
+        modifiers: ["MOD_LEFT_CTRL"]
+        key: "KEY_N"
+      - type: "delay"
+        ms: 800  # Wait for compose window
+      - type: "type"
+        text: "recipient@example.com"
+      - type: "key"
+        key: "KEY_TAB"
+      - type: "type"
+        text: "Meeting Reminder"
+      - type: "key"
+        key: "KEY_TAB"
+      - type: "key"
+        key: "KEY_TAB"
+      - type: "key_combo"
+        modifiers: ["MOD_LEFT_CTRL"]
+        key: "KEY_V"  # Paste from clipboard if template is copied
+
+  # Example 9: Volume control sequence
+  volume_mute_toggle:
+    name: "Mute/Unmute"
+    description: "Press volume mute key"
+    actions:
+      - type: "key"
+        key: "KEY_VOLUMEMUTE"
+
+  # Example 10: Slow typing for demonstration
+  slow_type_demo:
+    name: "Slow Type Demo"
+    description: "Type slowly for testing/demo"
+    delay_between_actions: 300  # 300ms between each action
+    actions:
+      - type: "type"
+        text: "Hello World!"
+  # Example 11: Repeat text (for use with SWITCH control type)
+  # Note: This macro is designed to work with a switch control that repeats
+  # the macro while the switch is ON. The macro will loop until the switch 
+  # is turned OFF in Home Assistant. Good for: walking around (hold down key),
+  # testing repeated automation, etc.
+  repeat_text:
+    name: "Repeat Sequence"
+    description: "Short sequence designed to loop when switch is ON"
+    delay_between_actions: 250  # 250ms between actions
+    actions:
+      - type: "type"
+        text: "Test "
+      - type: "key"
+        key: "KEY_RETURN"

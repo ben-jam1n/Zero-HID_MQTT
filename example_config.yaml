@@ -1,36 +1,55 @@
-# Example YAML config for Zero-HID_MQTT 
+# Zero-HID_MQTT Configuration
 
 # Logging level: DEBUG, INFO, WARNING, ERROR
 log_level: INFO
 
-# MQTT broker connection details
-mqtt_broker: xxx.xxx.xxx.xxx  # IP or hostname of your MQTT broker
-mqtt_port: 1883          # Default MQTT port
-mqtt_username: mqtt_username      # MQTT username
-mqtt_password: mqtt_password  # MQTT password
+# MQTT Broker Settings
+mqtt_broker: 192.168.1.100         # IP address or hostname of your MQTT broker
+mqtt_port: 1883                    # Standard MQTT port (usually 1883)
+mqtt_username: mqtt_user           # MQTT username
+mqtt_password: mqtt_pass           # MQTT password
 
-device_name: HID_XYZ  # Unique name for this device
-
+device_name: Control_Room          # Unique device name (used in MQTT topics, no spaces)
 
 # List of controls to expose via MQTT/Home Assistant
 controls:
-  # Shortcut 1
-  - name: Keyboard Shortcut 1  # Unique key for this control (used in MQTT payloads)
-    key: key_shortcut1 # Friendly name for Home Assistant
-    entity_type: button # button, switch, select, number
-    HID_type: keyboard  # keyboard, mouse
-    Modifiers: # Modifier keys to hold down (optional)
-      - MOD_LEFT_GUI #WIN key
-    KeyCodes: # Key coded to send
-      - KEY_L
-    entity_category: config   # Optional: config, diagnostic, or omit for none
+  # Example 1: Simple keyboard shortcut (WIN+L to lock screen)
+  - name: Lock Screen              # Display name in Home Assistant
+    key: lock_screen               # Unique identifier for this control
+    entity_type: button            # Type: button, switch, select, number
+    HID_type: keyboard             # Control type: keyboard or mouse
+    Modifiers:                     # Modifier keys to hold (optional)
+      - MOD_LEFT_GUI               # Windows/Super key
+    KeyCodes:                      # Main key(s) to press
+      - KEY_L                      # L key
+    entity_category: config        # Optional: control, config, diagnostic
 
+  # Example 2: Macro-based control (complex sequence from macros.yaml)
+  - name: Fill Login Form           # Display name in Home Assistant
+    key: login_macro               # Unique identifier for this control
+    entity_type: button            # Type: button
+    macro: login_credentials       # References macro defined in macros.yaml
+    entity_category: config
 
-  # Service Restart button (diagnostic)
-  - name: Restart Service
-    key: restart_service
+  # Example 3: Simple single key press (print screen)
+  - name: Screenshot               # Display name in Home Assistant
+    key: screenshot                # Unique identifier
     entity_type: button
-    entity_category: diagnostic  # Only shows in developer/diagnostic view
-    is_restart_button: true  # Flag to trigger service restart instead of keyboard commands
-  
- 
+    HID_type: keyboard
+    KeyCodes:
+      - KEY_SYSRQ                  # Print Screen key
+    entity_category: config
+
+  # Example 4: Switch with looping macro (repeat a sequence while ON)
+  - name: Repeat Type              # Display name in Home Assistant
+    key: repeat_macro              # Unique identifier
+    entity_type: switch            # Type: switch (can be ON/OFF for looping)
+    macro: repeat_text             # References macro defined in macros.yaml
+    entity_category: config        # Repeats the macro endlessly while ON
+
+  # Example 5: Service restart control (diagnostic - shows in developer/diagnostic view)
+  - name: Restart Service          # Display name in Home Assistant
+    key: restart_service           # Unique identifier
+    entity_type: button
+    is_restart_button: true        # Special control: restarts the service via MQTT
+    entity_category: diagnostic    # Only shows in developer/diagnostic view

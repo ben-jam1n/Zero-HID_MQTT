@@ -1,0 +1,25 @@
+# Macros Configuration for Zero-HID_MQTT
+#
+# Define complex keyboard/mouse sequences here.
+# Reference these macros in your config.yaml using the 'macro:' key instead of HID_action.
+#
+# See example_macros.yaml for more examples and full documentation.
+
+macros:
+  # Add your custom macros here
+  # Example macro (uncomment to use):
+  #
+  # my_macro:
+  #   name: "My Custom Macro"
+  #   description: "Does something cool"
+  #   delay_between_actions: 100  # milliseconds between actions
+  #   actions:
+  #     - type: "type"
+  #       text: "some text"
+  #     - type: "key"
+  #       key: "KEY_TAB"
+  #     - type: "delay"
+  #       ms: 500
+  #     - type: "key_combo"
+  #       modifiers: ["MOD_LEFT_CTRL"]
+  #       key: "KEY_S"

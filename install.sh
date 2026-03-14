@@ -35,6 +35,53 @@ fi
 echo "Installing zero-hid USB Gadget module..."
 cd $Zero_HID_DIR && cd ./usb_gadget
 sudo ./installer
+if [ $? -ne 0 ]; then
+    echo "ERROR: Failed to install zero-hid USB Gadget module!"
+    exit 1
+fi
+
+# 2.4 Remove conflicting g_ether from kernel command line (if present)
+echo "Checking for g_ether conflicts in boot configuration..."
+CMDLINE_FILE=""
+if [ -f "/boot/firmware/cmdline.txt" ]; then
+    CMDLINE_FILE="/boot/firmware/cmdline.txt"
+elif [ -f "/boot/cmdline.txt" ]; then
+    CMDLINE_FILE="/boot/cmdline.txt"
+fi
+
+if [ -n "$CMDLINE_FILE" ]; then
+    if grep -q "g_ether" "$CMDLINE_FILE"; then
+        echo "Found g_ether in kernel command line - removing to prevent UDC conflicts..."
+        sudo sed -i 's/modules-load=dwc2,g_ether/modules-load=dwc2/g' "$CMDLINE_FILE"
+        echo "  ✓ Removed g_ether from $CMDLINE_FILE"
+    else
+        echo "  ✓ No g_ether conflict found"
+    fi
+fi
+
+# 2.5 Verify HID gadget devices exist
+echo "Verifying HID gadget devices..."
+RETRY_COUNT=0
+MAX_RETRIES=5
+while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+    if [ -c "/dev/hidg0" ] && [ -c "/dev/hidg1" ] && [ -c "/dev/hidg2" ]; then
+        echo "  ✓ HID gadget devices created successfully"
+        break
+    fi
+    RETRY_COUNT=$((RETRY_COUNT + 1))
+    if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+        echo "  Waiting for HID devices to appear (attempt $RETRY_COUNT/$MAX_RETRIES)..."
+        sleep 2
+    fi
+done
+
+if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
+    echo "WARNING: HID gadget devices did not appear. This may cause issues."
+    echo "Please verify:"
+    echo "  1. USB cable is a data cable, not power-only"
+    echo "  2. dtoverlay=dwc2 is set in /boot/firmware/config.txt or /boot/config.txt"
+    echo "  3. Run: sudo $Zero_HID_DIR/usb_gadget/troubleshoot.sh (if available)"
+fi
 
 echo "zero-hid USB Gadget module installation complete!"
 echo "Now installing Zero-HID_MQTT service..."
@@ -101,6 +148,22 @@ echo "Enabling and starting systemd services..."
 sudo systemctl daemon-reload
 sudo systemctl enable Zero-HID_MQTT.service
 
+# 3.7 Verify installation
+echo ""
+echo "Verifying installation..."
+sleep 2
+
+if ! sudo systemctl is-enabled Zero-HID_MQTT.service > /dev/null 2>&1; then
+    echo "ERROR: Failed to enable Zero-HID_MQTT service!"
+    exit 1
+fi
+echo "  ✓ Zero-HID_MQTT service enabled"
+
+if ! grep -q "^MQTT_BROKER" "$INSTALL_DIR/config.yaml" 2>/dev/null; then
+    echo "  ⚠ WARNING: config.yaml not properly configured"
+    echo "    Please copy example_config.yaml to config.yaml and update it"
+fi
+
 
 # Final instructions
 echo ""
@@ -109,15 +172,20 @@ echo "Installation Complete!"
 echo "=========================================="
 echo ""
 echo "Next steps:"
-echo "1. Edit the configuration file:"
+echo "1. Copy and edit the configuration file:"
+echo "   cp $INSTALL_DIR/example_config.yaml $INSTALL_DIR/config.yaml"
 echo "   sudo nano $INSTALL_DIR/config.yaml"
-echo "2. Update MQTT broker settings and monitor controls"
+echo "2. Update MQTT broker settings and controls"
 echo "3. Start the service:"
 echo "   sudo systemctl start Zero-HID_MQTT.service"
 echo "4. Check service status:"
 echo "   sudo systemctl status Zero-HID_MQTT.service"
 echo "5. View logs in real-time:"
 echo "   sudo journalctl -u Zero-HID_MQTT.service -f"
+echo ""
+echo "Troubleshooting:"
+echo "If you're having issues, run the diagnostic script:"
+echo "   bash $INSTALL_DIR/troubleshoot.sh"
 echo ""
 echo "For more information, see README.md on https://github.com/ben-jam1n/Zero-HID_MQTT"
 echo "=========================================="

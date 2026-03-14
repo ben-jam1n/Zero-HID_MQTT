@@ -223,7 +223,7 @@ def main():
                     text = action.get("text", "")
                     logger.debug(f"  Action {idx}: type '{text}'")
                     with Keyboard() as k:
-                        k.write(text)
+                        k.type(text)
                 
                 elif action_type == "key":
                     # Press single key (with optional modifiers)

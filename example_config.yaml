@@ -19,10 +19,11 @@ controls:
     key: key_shortcut1 # Friendly name for Home Assistant
     entity_type: button # button, switch, select, number
     HID_type: keyboard  # keyboard, mouse
-    HID_action: # value to send when activated (WIN + L in this case)
-      - MOD_LEFT_GUI
-      - KeyCodes.KEY_L  
-    entity_category: control   # Optional: config, diagnostic, or omit for none
+    Modifiers: # Modifier keys to hold down (optional)
+      - MOD_LEFT_GUI #WIN key
+    KeyCodes: # Key coded to send
+      - KEY_L
+    entity_category: config   # Optional: config, diagnostic, or omit for none
 
 
   # Service Restart button (diagnostic)

@@ -8,18 +8,35 @@
 macros:
   # Add your custom macros here
   # Example macro (uncomment to use):
-  #
-  # my_macro:
-  #   name: "My Custom Macro"
-  #   description: "Does something cool"
-  #   delay_between_actions: 100  # milliseconds between actions
-  #   actions:
-  #     - type: "type"
-  #       text: "some text"
-  #     - type: "key"
-  #       key: "KEY_TAB"
-  #     - type: "delay"
-  #       ms: 500
-  #     - type: "key_combo"
-  #       modifiers: ["MOD_LEFT_CTRL"]
-  #       key: "KEY_S"
+
+  macro1:
+    name: "Macro 1"
+    description: "Does something cool"
+    delay_between_actions: 100  # milliseconds between actions
+    actions:
+      - type: "type"
+        text: "some text"
+      - type: "key"
+        key: "KEY_TAB"
+      - type: "delay"
+        ms: 500
+      - type: "key_combo"
+        modifiers: ["MOD_LEFT_CTRL"]
+        key: "KEY_S"
+
+  macro2:
+    name: "Macro 2"
+    description: "Repeat forever"
+    delay_between_actions: 100  # milliseconds between actions
+    actions:
+      - type: "type"
+        text: "some text"
+      - type: "key"
+        key: "KEY_TAB"
+      - type: "delay"
+        ms: 500
+      - type: "key_combo"
+        modifiers: ["MOD_LEFT_CTRL"]
+        key: "KEY_S"
+      - type: "delay"
+        ms: 5000
